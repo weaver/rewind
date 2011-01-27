@@ -65,7 +65,7 @@ function usage() {
     + 'option. Folders will be watched recursively. This option may be repeated.'
   );
 
-  process.exit(1);
+  process.exit(0);
 }
 
 
