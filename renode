@@ -1,0 +1,149 @@
+#!/usr/bin/env node
+
+// renode -- Automatically reload a node app when files change.
+//
+// Author: Ben Weaver <ben@orangesoda.net>
+// https://github.com/weaver/renode
+// v0.1.0
+//
+// Use renode to help develop node applications. It will spawn a
+// node subprocess that watches for changes to your program and its
+// dependencies. When a loaded module changes on disk, the subprocess
+// exits and starts again.
+//
+// For example:
+//
+//     renode server.js 8080
+//
+// This will start `server.js`. Any changes to `server.js` or its
+// dependencies will cause the server to restart.
+//
+// Renode is helpful for development. It's not recommended for
+// production use :)
+
+var Sys = require('sys'),
+    Fs = require('fs'),
+    Path = require('path'),
+    Child = require('child_process'),
+    Assert = require('assert'),
+    writeError = process.binding('stdio').writeError,
+    kRestart = 111,
+    kInterval = 1000;
+
+function main() {
+  var script = process.argv[1],
+      opt = process.argv[2];
+
+  if (opt == '--run') {
+    process.argv.splice(1, 2);
+    run();
+  }
+  else {
+    spawn();
+  }
+
+}
+
+
+// ## Spawn an Application ##
+
+function spawn() {
+  var args = [].concat(process.argv),
+      cmd = args.shift(),
+      stdin = process.openStdin(),
+      app;
+
+  args.splice(1, 0, '--run');
+  start();
+
+  function start() {
+    app = Child.spawn(cmd, args);
+
+    app.on('exit', function(code) {
+      if (code == kRestart)
+        restart();
+      else
+        process.exit(code);
+    });
+
+    app.stdout.on('data', function(data) {
+      Sys.print(data);
+    });
+
+    app.stderr.on('data', function(data) {
+      writeError(data);
+    });
+
+    stdin
+      .removeAllListeners('data')
+      .removeAllListeners('end')
+      .on('data', function(data) {
+        app.stdin.write(data);
+      })
+      .on('end', function() {
+        app.stdin.end();
+      });
+  }
+
+  function restart() {
+    console.log('## Restarting ##');
+    start();
+  }
+
+  process.on('exit', function() {
+    app && app.kill();
+  });
+
+}
+
+
+// ## Run Application ##
+
+function run() {
+  Assert.ok(process.argv[1], 'Missing required script name.');
+
+  pollModules(function(changed) {
+    process.exit(kRestart);
+  });
+
+  process.on('uncaughtException', function(err) {
+    if (process.listeners('uncaughtException').length == 1) {
+      console.error('\n## Uncaught Exception ##\n');
+      console.error(err.message);
+      console.error(err.stack);
+      console.error('');
+      process.exit(kRestart);
+    }
+  });
+
+  var script = process.argv[1];
+
+  if (script[0] != '/')
+    script = Path.join(process.cwd(), script);
+
+  require(script);
+}
+
+function pollModules(onChange) {
+  var watching = {},
+      cache = module.moduleCache;
+
+  setInterval(scan, kInterval);
+
+  function scan() {
+    for (var file in cache)
+      (file in watching) || add(file);
+  }
+
+  function add(file) {
+    watching[file] = true;
+    Fs.watchFile(file, function(curr, prev) {
+      onChange(file, curr, prev);
+    });
+  }
+}
+
+
+// ## Main Program ##
+
+main();
