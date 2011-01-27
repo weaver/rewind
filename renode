@@ -4,7 +4,7 @@
 //
 // Author: Ben Weaver <ben@orangesoda.net>
 // https://github.com/weaver/renode
-// v0.1.0
+// v0.1.1
 //
 // Use renode to help develop node applications. It will spawn a
 // node subprocess that watches for changes to your program and its
@@ -109,7 +109,6 @@ function run() {
   process.on('uncaughtException', function(err) {
     if (process.listeners('uncaughtException').length == 1) {
       console.error('\n## Uncaught Exception ##\n');
-      console.error(err.message);
       console.error(err.stack);
       console.error('');
       process.exit(kRestart);
