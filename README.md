@@ -1,29 +1,21 @@
 # renode #
 
-Automatically restart a node application when files change.
+Automatically restart a Node application when dependencies change.
 
 ## Installation ##
 
-Download `renode`, put it in your $PATH, and `chmod a+x` it.
+Install with npm:
 
-## About ##
+    npm install -g renode
 
-Use renode to help develop node applications. It will spawn an
-application in a subprocess and watch for changes to your program and
-its dependencies. When a loaded module changes on disk, the subprocess
-exits and starts again.
-
-Disclaimer: `renode` is helpful for development. It's not recommended
-for production use :)
-
-## Usage ##
+## Getting Started ##
 
 Start your application with `renode` instead of `node`:
 
     renode server.js 8080
 
-This will start `server.js`. Any changes to `server.js` or its
-dependencies will cause the server to restart.
+This will load `server.js` as the main module. Any changes to
+`server.js` or its dependencies will cause the server to restart.
 
 If you application caches non-module assets, use the `-w` option to
 instruct `renode` to watch them. For example:
@@ -32,3 +24,19 @@ instruct `renode` to watch them. For example:
 
 `Renode` will scan these files or folders recursively. If any file is
 modified, the application with be restarted.
+
+
+## How it Works ##
+
+Renode forks a subprocess that runs the real application. The
+subprocess detects loaded modules and reports them to the parent
+process, which is monitoring the filesystem using [fs.watch()][0]. If
+any dependency changes, the subprocess is terminated with a `SIGHUP`
+and forked again.
+
+If the subprocess dies (e.g. exits non-zero), `renode` waits until one
+on the monitored files is changed. If the subprocess terminats
+normally (e.g. exits zero), renode stops monitoring files and exits as
+well.
+
+[0]: http://nodejs.org/api/fs.html#fs_fs_watch_filename_options_listener

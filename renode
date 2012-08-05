@@ -1,68 +1,41 @@
 #!/usr/bin/env node
 
-// renode -- automatically restart a node application when files change.
-//
-// Author: Ben Weaver <ben@orangesoda.net>
-// https://github.com/weaver/renode
-// v0.1.2
-//
-// ## Installation ##
-//
-// Download `renode`, put it in your $PATH, and `chmod a+x` it.
-//
-// ## Usage ##
-//
-// Start your application with `renode` instead of `node`:
-//
-//     renode server.js 8080
-//
-// This will start `server.js`. Any changes to `server.js` or its
-// dependencies will cause the server to restart.
-//
-// If you application caches non-module assets, use the `-w` option to
-// instruct `renode` to watch them. For example:
-//
-//     renode -w ./static -w ./templates server.js 8080
-//
-// `Renode` will scan these files or folders recursively. If any file is
-// modified, the application with be restarted.
-
 var Sys = require('sys'),
-    Fs = require('fs'),
-    Path = require('path'),
-    Child = require('child_process'),
-    Assert = require('assert'),
-    writeError = process.binding('stdio').writeError,
-    kRestart = 111,
-    kInterval = 1000;
+	Fs = require('fs'),
+	Path = require('path'),
+	Child = require('child_process'),
+	Assert = require('assert'),
+	writeError = process.binding('stdio').writeError,
+	kRestart = 111,
+	kInterval = 1000;
 
 function main() {
   var opt = parseArgs({ help: usage, w: [], run: '' }),
-      script = process.argv[2];
+	  script = process.argv[2];
 
   if (!script)
-    usage();
+	usage();
   else if (opt.run) {
-    process.argv.splice(1, 1);
-    run(JSON.parse(opt.run));
+	process.argv.splice(1, 1);
+	run(JSON.parse(opt.run));
   }
   else
-    spawn(opt.w);
+	spawn(opt.w);
 }
 
 function usage() {
   console.log('Renode automatically restarts your Node app when its dependencies '
-    + 'change\n\n'
+	+ 'change\n\n'
 
-    + 'Usage: renode [options] app.js args...\n\n'
+	+ 'Usage: renode [options] app.js args...\n\n'
 
-    + 'Options:\n'
-    + '  --help \t Show this message.\n'
-    + '  -w path\t Watch this folder/file for changes.\n\n'
+	+ 'Options:\n'
+	+ '	 --help \t Show this message.\n'
+	+ '	 -w path\t Watch this folder/file for changes.\n\n'
 
-    + 'By default, renode watches modules loaded by the app. If the app caches '
-    + 'non-module assets that also need to be watched, identify them with the `-w` '
-    + 'option. Folders will be watched recursively. This option may be repeated.'
+	+ 'By default, renode watches modules loaded by the app. If the app caches '
+	+ 'non-module assets that also need to be watched, identify them with the `-w` '
+	+ 'option. Folders will be watched recursively. This option may be repeated.'
   );
 
   process.exit(0);
@@ -73,27 +46,27 @@ function usage() {
 
 function spawn(assets) {
   var args = [].concat(process.argv),
-      cmd = args.shift(),
-      stdin = process.openStdin(),
-      app;
+	  cmd = args.shift(),
+	  stdin = process.openStdin(),
+	  app;
 
   args.splice(1, 0, '--run', JSON.stringify(assets));
   start();
 
   function start() {
-    (app = pipeStd(Child.spawn(cmd, args)))
-      .on('exit', function(code) {
-        (code == kRestart) ? restart() : process.exit(code);
-      });
+	(app = pipeStd(Child.spawn(cmd, args)))
+	  .on('exit', function(code) {
+		(code == kRestart) ? restart() : process.exit(code);
+	  });
   }
 
   function restart() {
-    console.log('## Restarting ##');
-    start();
+	console.log('## Restarting ##');
+	start();
   }
 
   function stop() {
-    app && app.kill();
+	app && app.kill();
   }
 
   process.on('exit', stop);
@@ -101,21 +74,21 @@ function spawn(assets) {
 
 function pipeStd(proc) {
   process.openStdin()
-    .removeAllListeners('data')
-    .removeAllListeners('end')
-    .on('data', function(data) {
-      proc.stdin.write(data);
-    })
-    .on('end', function() {
-      proc.stdin.end();
-    });
+	.removeAllListeners('data')
+	.removeAllListeners('end')
+	.on('data', function(data) {
+	  proc.stdin.write(data);
+	})
+	.on('end', function() {
+	  proc.stdin.end();
+	});
 
   proc.stdout.on('data', function(data) {
-    Sys.print(data);
+	Sys.print(data);
   });
 
   proc.stderr.on('data', function(data) {
-    writeError(data);
+	writeError(data);
   });
 
   return proc;
@@ -128,14 +101,14 @@ function run(assets) {
   Assert.ok(process.argv[1], 'Missing required script name.');
 
   pollModules(assets, function(changed) {
-    process.exit(kRestart);
+	process.exit(kRestart);
   });
 
   process.on('uncaughtException', function(err) {
-    console.error('\n## Uncaught Exception ##\n');
-    console.error(err.stack);
-    console.error('');
-    process.nextTick(function() { process.exit(kRestart); });
+	console.error('\n## Uncaught Exception ##\n');
+	console.error(err.stack);
+	console.error('');
+	process.nextTick(function() { process.exit(kRestart); });
   });
 
   require(resolve(process.cwd(), process.argv[1]));
@@ -143,21 +116,21 @@ function run(assets) {
 
 function pollModules(assets, onChange) {
   var watching = {},
-      cache = module.moduleCache;
+	  cache = module.moduleCache;
 
   walkEach(assets, add);
   setInterval(scan, kInterval);
 
   function scan() {
-    for (var file in cache)
-      (file in watching) || add(file);
+	for (var file in cache)
+	  (file in watching) || add(file);
   }
 
   function add(file) {
-    watching[file] = true;
-    Fs.watchFile(file, function(curr, prev) {
-      onChange(file, curr, prev);
-    });
+	watching[file] = true;
+	Fs.watchFile(file, function(curr, prev) {
+	  onChange(file, curr, prev);
+	});
   }
 }
 
@@ -166,48 +139,48 @@ function pollModules(assets, onChange) {
 
 function walkEach(paths, fn) {
   paths.forEach(function(file) {
-    walk(file, fn);
+	walk(file, fn);
   });
 }
 
 function walk(path, fn) {
   Fs.lstat(path, function(err, stats) {
-    if (err) {
-      console.error(err.message);
-    }
-    else {
-      fn(path);
-      if (stats.isDirectory())
-        process.nextTick(function() { walkFolder(path, fn); });
-      else if (stats.isSymbolicLink())
-        process.nextTick(function() { walkLink(path, fn); });
-    }
+	if (err) {
+	  console.error(err.message);
+	}
+	else {
+	  fn(path);
+	  if (stats.isDirectory())
+		process.nextTick(function() { walkFolder(path, fn); });
+	  else if (stats.isSymbolicLink())
+		process.nextTick(function() { walkLink(path, fn); });
+	}
   });
 }
 
 function walkLink(path, fn) {
   Fs.readlink(path, function(err, target) {
-    if (err)
-      console.error(err.message);
-    else
-      Path.exists(target = resolve(path, target), function(exists) {
-        exists && process.nextTick(function() { walk(target, fn); });
-      });
+	if (err)
+	  console.error(err.message);
+	else
+	  Path.exists(target = resolve(path, target), function(exists) {
+		exists && process.nextTick(function() { walk(target, fn); });
+	  });
   });
 }
 
 function walkFolder(path, fn) {
   Fs.readdir(path, function(err, files) {
-    if (err)
-      console.error(err.message);
-    else
-      walkEach(files.map(function(file) { return resolve(path, file); }), fn);
+	if (err)
+	  console.error(err.message);
+	else
+	  walkEach(files.map(function(file) { return resolve(path, file); }), fn);
   });
 }
 
 function resolve(root, path) {
   if (path[0] != '/')
-    path = Path.join(root, path);
+	path = Path.join(root, path);
   return path;
 }
 
@@ -216,17 +189,17 @@ function resolve(root, path) {
 
 function parseArgs(opt) {
   (new ParseArgs())
-    .each(function(name) {
-      var val = opt[name];
-      if (val === undefined)
-        this.fail('Unrecognized option');
-      else if (typeof val == 'function')
-        val.call(this, opt);
-      else if (val instanceof Array)
-        val.push(this.shift());
-      else
-        opt[name] = (typeof val == 'boolean') ? true : this.shift();
-    });
+	.each(function(name) {
+	  var val = opt[name];
+	  if (val === undefined)
+		this.fail('Unrecognized option');
+	  else if (typeof val == 'function')
+		val.call(this, opt);
+	  else if (val instanceof Array)
+		val.push(this.shift());
+	  else
+		opt[name] = (typeof val == 'boolean') ? true : this.shift();
+	});
   return opt;
 }
 
@@ -249,14 +222,14 @@ ParseArgs.prototype.start = function() {
   this.done = false;
 
   while(!this.done && this.index < this.limit && this.argv[this.index][0] == '-') {
-    if ((arg = this.argv[this.index++]) == '--')
-      this.stop();
-    else if (!arg[1])
-      this.fail('Bad option');
-    else if (arg[1] == '-')
-      this.handle(arg.substr(2));
-    else
-      this.handle(arg.substr(1));
+	if ((arg = this.argv[this.index++]) == '--')
+	  this.stop();
+	else if (!arg[1])
+	  this.fail('Bad option');
+	else if (arg[1] == '-')
+	  this.handle(arg.substr(2));
+	else
+	  this.handle(arg.substr(1));
   }
 
   process.argv.splice(this.first, this.index - this.first);
@@ -284,12 +257,12 @@ ParseArgs.prototype.peek = function() {
 ParseArgs.prototype.shift = function() {
   var val = this.peek();
   if (val === undefined || val[0] == '-') {
-    this.fail('Expected value');
-    return undefined;
+	this.fail('Expected value');
+	return undefined;
   }
   else {
-    this.index++;
-    return val;
+	this.index++;
+	return val;
   }
 };
 

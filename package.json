@@ -1,0 +1,12 @@
+{
+	"name": "renode",
+	"description": "Automatically restart a Node application when files change",
+	"version": "1.0.0",
+	"author": "Ben Weaver <ben@orangesoda.net>",
+	"keywords": ["utility", "watch", "files", "restart"],
+	"repository": "git://github.com/weaver/renode.git",
+	"main": "./lib/monitor.js",
+	"scripts": { "prepublish": "npm prune" },
+	"bin": { "renode": "./bin/renode" },
+	"engines": { "node": ">= 0.6" }
+}
