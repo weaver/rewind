@@ -30,14 +30,14 @@ modified, the application with be restarted.
 
 ## How it Works ##
 
-Renode forks a subprocess that runs the real application. The
-subprocess detects loaded modules and reports them to the parent
-process, which is monitoring the filesystem using [fs.watch()][0]. If
-any dependency changes, the subprocess is terminated with a `SIGHUP`
-and forked again.
+Renode forks a subprocess to run the real application. The subprocess
+detects loaded modules and reports them to the parent, which is
+monitoring the filesystem using [fs.watch()][0]. If any dependency
+changes, the subprocess is terminated with a `SIGHUP` and forked
+again.
 
 If the subprocess dies (exits non-zero), `renode` waits until one on
-the monitored files is changed. If the subprocess terminats normally
+the monitored files is changed. If the subprocess terminatss normally
 (exits zero), renode stops monitoring files and exits as well.
 
 [0]: http://nodejs.org/api/fs.html#fs_fs_watch_filename_options_listener
