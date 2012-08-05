@@ -6,7 +6,9 @@ Automatically restart a Node application when dependencies change.
 
 Install with npm:
 
-    npm install -g renode
+    git clone git://github.com/weaver/renode.git
+    cd renode
+    npm install -g
 
 ## Getting Started ##
 
