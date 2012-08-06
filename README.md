@@ -28,6 +28,16 @@ watch them. For example:
 modified, the application with be restarted.
 
 
+## Features ##
+
++ Restarts your application automatically when files change.
++ Monitors anything Node loads; no hard-coded filename extensions!
++ By default, only monitor loaded modules; no need for .ignore files.
++ Uses [fs.watch()][0], so detecting changes is fast!
++ Optionally upports monitoring any additional folders.
++ Ignores temporary editor files.
+
+
 ## How it Works ##
 
 Rewind forks a subprocess to run the real application. The subprocess
