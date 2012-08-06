@@ -1,12 +1,20 @@
 {
-	"name": "renode",
+	"name": "rewind",
 	"description": "Automatically restart a Node application when files change",
-	"version": "1.0.0",
+	"version": "0.8.0",
 	"author": "Ben Weaver <ben@orangesoda.net>",
-	"keywords": ["utility", "watch", "files", "restart"],
-	"repository": "git://github.com/weaver/renode.git",
+	"keywords": [
+		"utility",
+		"watch",
+		"files",
+		"dependencies",
+		"restart",
+		"reload",
+		"automatically"
+	],
+	"repository": "git://github.com/weaver/rewind.git",
 	"main": "./lib/monitor.js",
 	"scripts": { "prepublish": "npm prune" },
-	"bin": { "renode": "./bin/renode" },
+	"bin": { "rewind": "./bin/rewind.js" },
 	"engines": { "node": ">= 0.6" }
 }

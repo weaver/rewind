@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var ReNode = require('renode');
+var Rewind = require('rewind');
 
 function main() {
 	var opt = parseArgs(process.argv, 2),
@@ -13,14 +13,14 @@ function main() {
 }
 
 function usage(reason) {
-	console.log("renode [renode-options] [node-options] node-args ...");
+	console.log("rewind [rewind-options] [node-options] node-args ...");
 	console.log("");
 
 	if (reason)
 		console.log('Error,', reason);
 	else {
 		console.log('Options');
-		console.log('  -h, --help\t\t about renode');
+		console.log('  -h, --help\t\t about rewind');
 		console.log('  -w, --watch <path>\t monitor additional files');
 		console.log('');
 		console.log('Automatically restart a Node application when files change.');
@@ -55,7 +55,7 @@ function parseArgs(argv, start) {
 }
 
 function monitor(argv, watch) {
-	ReNode.monitor(argv[0], argv.slice(1), { watch: watch })
+	Rewind.monitor(argv[0], argv.slice(1), { watch: watch })
 		.on('change', function(file) {
 			if (this.isRunning())
 				console.log('');
