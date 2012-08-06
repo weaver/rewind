@@ -19,8 +19,8 @@ Start your application with `rewind` instead of `node`:
 This will load `server.js` as the main module. Any changes to
 `server.js` or its dependencies will cause the server to restart.
 
-If you application caches non-module assets, use the `-w` option to
-instruct `rewind` to watch them. For example:
+If your application caches non-module assets, use the `-w` option to
+watch them. For example:
 
     rewind -w ./static -w ./templates server.js 3000
 
